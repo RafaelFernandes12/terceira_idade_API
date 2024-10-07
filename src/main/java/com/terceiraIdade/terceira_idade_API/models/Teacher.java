@@ -3,12 +3,10 @@ package com.terceiraIdade.terceira_idade_API.models;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -31,8 +29,8 @@ public class Teacher {
 	@Column(name = "id", unique = true)
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-
-	@Column(name = "name", length = 100, nullable = false)
+	
+	@Column(name = "name", length = 100, nullable = false, unique = true)
 	@Size(min = 2, max = 100)
 	@NotBlank
 	private String name;
@@ -44,4 +42,11 @@ public class Teacher {
 	@OneToMany(mappedBy = "teacher", cascade = CascadeType.ALL)
 	@JsonIgnore
 	private Set<Course> courses;
+
+	public Teacher(Long id, @Size(min = 2, max = 100) @NotBlank String name, @Size(min = 2, max = 255) String img) {
+		super();
+		this.id = id;
+		this.name = name;
+		this.img = img;
+	}
 }

@@ -5,28 +5,21 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.terceiraIdade.terceira_idade_API.dto.CreateCourseDto;
-import com.terceiraIdade.terceira_idade_API.dto.UpdateCourseDto;
+import com.terceiraIdade.terceira_idade_API.dto.course.UpdateCourseDto;
+import com.terceiraIdade.terceira_idade_API.exceptions.exceptionsDetails.NotFoundException;
 import com.terceiraIdade.terceira_idade_API.models.Course;
 import com.terceiraIdade.terceira_idade_API.repositories.CourseRepository;
 
-import jakarta.transaction.Transactional;
-import lombok.extern.log4j.Log4j2;
-
 @Service
-@Log4j2
 public class CourseService {
 
 	@Autowired
 	private CourseRepository courseRespository;
 
-	@Transactional
-	public Course create(CreateCourseDto course) {
-		Course newCourse = Course.builder().name(course.getName()).type(course.getType()).img(course.getImg())
-				.teacher(course.getTeacher()).build();
+	public Course create(Course course) {
 
-		courseRespository.save(newCourse);
-		return newCourse;
+		courseRespository.save(course);
+		return course;
 	}
 
 	public List<Course> findAll() {
@@ -34,25 +27,24 @@ public class CourseService {
 	}
 
 	public Course findById(Long id) {
-		Course course = this.courseRespository.findById(id).orElseThrow(() -> new RuntimeException("achei nada"));
-		return course;
+		return this.courseRespository.findById(id)
+				.orElseThrow(() -> new NotFoundException("Nenhum curso foi encontrado!"));
 	}
 
 	public Course update(UpdateCourseDto course) {
-		
-		Course updatedCourse = findById(course.getId());
-		
-		updatedCourse.setName(course.getName());
-		updatedCourse.setImg(course.getImg());
-		updatedCourse.setTeacher(course.getTeacher());
-		updatedCourse.setType(course.getType());
-		
-		this.courseRespository.save(updatedCourse);
-		return updatedCourse;
+
+		Course newCourse = Course.builder().id(course.getId()).name(course.getName()).type(course.getType())
+				.img(course.getImg()).teacher(course.getTeacher()).build();
+
+		this.courseRespository.delete(findById(course.getId()));
+
+		this.courseRespository.save(newCourse);
+		return newCourse;
 	}
-	
+
 	public void delete(Long id) {
-		this.courseRespository.deleteById(id);
+		Course course = findById(id);
+		this.courseRespository.delete(course);
 	}
 
 }
