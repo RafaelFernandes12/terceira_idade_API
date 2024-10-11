@@ -9,16 +9,25 @@ import com.terceiraIdade.terceira_idade_API.exceptions.exceptionsDetails.NotFoun
 import com.terceiraIdade.terceira_idade_API.models.Student;
 import com.terceiraIdade.terceira_idade_API.repositories.StudentRepository;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class StudentService {
 
 	@Autowired
 	private StudentRepository studentRepository;
 
+	@Transactional
 	public Student create(Student student) {
+		student.getPersonResponsible().setId(null);
+		student.getStudentDocs().setId(null);
+		Student newStudent = Student.builder().birth(student.getBirth())
+				.studentDocs(student.getStudentDocs()).courses(student.getCourses())
+				.cpf(student.getCpf()).img(student.getImg()).name(student.getName())
+				.personResponsible(student.getPersonResponsible()).phone(student.getPhone())
+				.build();
 
-		studentRepository.save(student);
-		return student;
+		return studentRepository.save(newStudent);
 	}
 
 	public List<Student> findAll() {
@@ -26,32 +35,25 @@ public class StudentService {
 	}
 
 	public Student findById(Long id) {
-		return this.studentRepository.findById(id)
-				.orElseThrow(() -> new NotFoundException("Nenhum estudante foi encontrado!"));
+
+		return this.studentRepository.findById(id).orElseThrow(() -> new NotFoundException(
+				"Nenhum estudante com o id: " + id + " foi encontrado"));
 	}
 
-	public Student update(Student student) {
+	@Transactional
+	public Student update(Student student, Long id) {
 
-		Student existingStudent = findById(student.getId());
-		
-		existingStudent.setName(student.getName());
-	    existingStudent.setBirth(student.getBirth());
-	    existingStudent.setImg(student.getImg());
-	    existingStudent.setCardioImg(student.getCardioImg());
-	    existingStudent.setCpf(student.getCpf());
-	    existingStudent.setDermaImg(student.getDermaImg());
-	    existingStudent.setPhone(student.getPhone());
-	    existingStudent.setResidenceImg(student.getResidenceImg());
-	    existingStudent.setRgBackImg(student.getRgBackImg());
-	    existingStudent.setRgFrontImg(student.getRgFrontImg());
+		findById(id);
 
-	    if (student.getPersonResponsible() != null) {
-	        existingStudent.setPersonResponsible(student.getPersonResponsible());
-	    }
+		Student newStudent = Student.builder().birth(student.getBirth())
+				.studentDocs(student.getStudentDocs()).courses(student.getCourses())
+				.cpf(student.getCpf()).img(student.getImg()).name(student.getName())
+				.personResponsible(student.getPersonResponsible()).phone(student.getPhone())
+				.build();
 
-	    studentRepository.save(existingStudent);
-		
-		return existingStudent;
+		studentRepository.save(newStudent);
+
+		return newStudent;
 	}
 
 	public void delete(Long id) {

@@ -46,7 +46,7 @@ public class TeacherController {
     }
 	@PutMapping("/{id}")
 	public ResponseEntity<Void> update(@Valid @RequestBody Teacher teacher, @PathVariable Long id) {
-		this.teacherService.update(teacher);
+		this.teacherService.update(teacher, id);
 		return ResponseEntity.noContent().build();
 	}
 	

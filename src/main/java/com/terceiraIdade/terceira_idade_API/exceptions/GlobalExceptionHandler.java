@@ -1,65 +1,78 @@
 package com.terceiraIdade.terceira_idade_API.exceptions;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.hibernate.ObjectNotFoundException;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+
+import com.terceiraIdade.terceira_idade_API.exceptions.exceptionsDetails.NotFoundException;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 
 @RestControllerAdvice
-public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
+public class GlobalExceptionHandler {
 
-    @Value("${server.error.include-exception}")
-    private boolean printStackTrace;
-	
-    @ExceptionHandler(ObjectNotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ResponseEntity<Object> handleObjectNotFoundException(
-            ObjectNotFoundException objectNotFoundException,
-            WebRequest request) {
-        return buildErrorResponse(
-                objectNotFoundException,
-                HttpStatus.NOT_FOUND,
-                request);
-    }
-    
-    @ExceptionHandler(DataIntegrityViolationException.class)
-    @ResponseStatus(HttpStatus.CONFLICT)
-    public ResponseEntity<Object> handleDataIntegrityViolationException(
-            DataIntegrityViolationException dataIntegrityViolationException,
-            WebRequest request) {
-        String errorMessage = dataIntegrityViolationException.getMostSpecificCause().getMessage();
-        return buildErrorResponse(
-                dataIntegrityViolationException,
-                errorMessage,
-                HttpStatus.CONFLICT,
-                request);
-    }
-    
-    
-    private ResponseEntity<Object> buildErrorResponse(
-            Exception exception,
-            HttpStatus httpStatus,
-            WebRequest request) {
-        return buildErrorResponse(exception, exception.getMessage(), httpStatus, request);
-    }
-    
-    private ResponseEntity<Object> buildErrorResponse(
-            Exception exception,
-            String message,
-            HttpStatus httpStatus,
-            WebRequest request) {
-        ErrorResponse errorResponse = new ErrorResponse(httpStatus.value(), message);
-        if (this.printStackTrace) {
-            errorResponse.setStackTrace(ExceptionUtils.getStackTrace(exception));
-        }
-        return ResponseEntity.status(httpStatus).body(errorResponse);
-    }
+	@Autowired
+	private ErrorResponse errorResponse;
 
+	@ExceptionHandler(NotFoundException.class)
+	public ResponseEntity<ErrorResponse> handleObjectNotFoundException(NotFoundException e,
+			HttpServletRequest request) {
+		return errorResponse.errorResponseBuilder(e, HttpStatus.NOT_FOUND, null, request);
+	}
+
+	@ExceptionHandler(MethodArgumentNotValidException.class)
+	public ResponseEntity<ErrorResponse> handleMethodArgumentNotValid(
+			MethodArgumentNotValidException e, HttpServletRequest request) {
+
+		Map<String, String> errors = new HashMap<String, String>();
+
+		e.getBindingResult().getFieldErrors().forEach(er -> {
+			errors.put(er.getField(), er.getDefaultMessage());
+		});
+
+		return errorResponse.errorResponseBuilder(e, HttpStatus.BAD_REQUEST, errors, request);
+	}
+
+	@ExceptionHandler(DataIntegrityViolationException.class)
+	public ResponseEntity<ErrorResponse> handleDataIntegrityViolationException(
+			DataIntegrityViolationException e, HttpServletRequest request) {
+
+		String rootCauseMessage = ExceptionUtils.getRootCauseMessage(e);
+
+		Map<String, String> errors = new HashMap<String, String>();
+		HttpStatus status = HttpStatus.BAD_REQUEST;
+		if (rootCauseMessage.contains("course"))
+			errors.put("curso", "Já existe um curso com o mesmo nome");
+		else if (rootCauseMessage.contains("student"))
+			errors.put("cpf", "CPF está em uso");
+		else {
+			errors.put("Servidor", "Um imprevisto ocorreu, tente novamente mais tarde!");
+			status = HttpStatus.INTERNAL_SERVER_ERROR;
+		}
+		return errorResponse.errorResponseBuilder(e, status, errors, request);
+	}
+
+	@ExceptionHandler(ConstraintViolationException.class)
+	public ResponseEntity<ErrorResponse> handleConstraintViolationExceptionException(
+			ConstraintViolationException e, HttpServletRequest request) {
+
+		Map<String, String> errors = new HashMap<>();
+
+		Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
+		for (ConstraintViolation<?> violation : violations) {
+			errors.put(violation.getPropertyPath().toString(), violation.getMessage());
+		}
+		return errorResponse.errorResponseBuilder(e, HttpStatus.BAD_REQUEST, errors, request);
+	}
 }

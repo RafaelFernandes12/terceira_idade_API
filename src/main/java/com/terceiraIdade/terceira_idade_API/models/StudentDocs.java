@@ -10,32 +10,44 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
-@Table(name = "personResponsible")
+@Table(name = "studentDocs")
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
+@Getter
+@Setter
 @Builder
-public class PersonResponsible {
+public class StudentDocs {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
 	@NotBlank
-	private String name;
+	private String vaccineImg;
 
-	@Size(min = 8, max = 12)
 	@NotBlank
-	private String phone;
+	private String rgFrontImg;
 
-	@OneToOne(mappedBy = "personResponsible", cascade = CascadeType.ALL)
+	@NotBlank
+	private String rgBackImg;
+
+	@NotBlank
+	private String residenceImg;
+
+	@NotBlank
+	private String cardioImg;
+
+	@NotBlank
+	private String dermaImg;
+
+	@OneToOne(mappedBy = "studentDocs", cascade = CascadeType.ALL)
 	@JsonIgnore
 	private Student student;
 }

@@ -1,10 +1,13 @@
 package com.terceiraIdade.terceira_idade_API.services;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,8 +19,11 @@ import org.mockito.MockitoAnnotations;
 
 import com.terceiraIdade.terceira_idade_API.exceptions.exceptionsDetails.NotFoundException;
 import com.terceiraIdade.terceira_idade_API.models.Course;
+import com.terceiraIdade.terceira_idade_API.models.Student;
 import com.terceiraIdade.terceira_idade_API.repositories.CourseRepository;
+import com.terceiraIdade.terceira_idade_API.repositories.StudentRepository;
 import com.terceiraIdade.terceira_idade_API.utils.CourseObjects;
+import com.terceiraIdade.terceira_idade_API.utils.StudentObjects;
 
 import lombok.extern.log4j.Log4j2;
 
@@ -31,12 +37,20 @@ class CourseServiceTest {
 	@InjectMocks
 	private CourseObjects courseObjects;
 
+	@InjectMocks
+	private StudentObjects studentObjects;
+
+	@Mock
+	private StudentService studentService;
+	@Mock
+	private StudentRepository studentRepository;
 	@Mock
 	private CourseRepository courseRepository;
-	
+
 	private Course mathCourse;
 	private Course scienceCourse;
-	
+	private Set<Student> students = new HashSet<>();
+
 	@BeforeEach
 	void setUp() {
 		MockitoAnnotations.openMocks(this);
@@ -45,10 +59,25 @@ class CourseServiceTest {
 	}
 
 	@Test
-	void save_createCourse_success() {
+	void save_createCourseWithStudents_success() {
+		when(studentService.findById(1L)).thenReturn(studentObjects.carla());
+
+		students.add(studentObjects.carla());
+		mathCourse.setStudents(students);
+
+		when(courseRepository.save(any(Course.class))).thenReturn(mathCourse);
+
 		Course createdCourse = this.courseService.create(mathCourse);
-		log.info(createdCourse);
-		Assertions.assertThat(createdCourse).isNotNull().isEqualTo(mathCourse);
+		Student carla = createdCourse.getStudents().stream().filter(x -> x.getId().equals(1L))
+				.findFirst().orElse(null);
+
+		Assertions.assertThat(createdCourse.getName()).isEqualTo("Math");
+		Assertions.assertThat(createdCourse.getStudents()).hasSize(1);
+		Assertions.assertThat(carla.getName()).isEqualTo("carla");
+		Assertions.assertThat(createdCourse.getStudents()).contains(carla);
+
+		verify(courseRepository).save(any(Course.class));
+		verify(studentService).findById(1L);
 	}
 
 	@Test
@@ -57,12 +86,15 @@ class CourseServiceTest {
 
 		Course actualCourse = courseService.findById(mathCourse.getId());
 
+		Assertions.assertThat(mathCourse.getName()).isEqualTo("Math");
 		Assertions.assertThat(mathCourse).isEqualTo(actualCourse);
 	}
 
 	@Test
 	void findById_throwNotFoundExceptionWhenCourseIsNotFound_exception() {
-		Assertions.assertThatThrownBy(() -> this.courseService.findById(10000L)).isInstanceOf(NotFoundException.class);
+		Assertions.assertThatThrownBy(() -> this.courseService.findById(10000L))
+				.isInstanceOf(NotFoundException.class)
+				.hasMessageContaining("Nenhum curso com o id: " + 10000L + " foi encontrado");
 	}
 
 	@Test
@@ -83,19 +115,36 @@ class CourseServiceTest {
 	@Test
 	void delete_removeCourse_success() {
 
-		when(this.courseRepository.findById(mathCourse.getId())).thenReturn(Optional.of(mathCourse));
+		when(this.courseRepository.findById(mathCourse.getId()))
+				.thenReturn(Optional.of(mathCourse));
 		courseService.delete(mathCourse.getId());
 
 		verify(courseRepository).delete(mathCourse);
 	}
-	
-//	@Test
-//	void update_updateCourse_success() {
-//		
-//		Course mathCourseSaved = this.courseService.create(mathCourse);
-//		
-//		
-//		
-//	}
+
+	@Test
+	void update_updateCourse_success() {
+
+		when(this.courseRepository.findById(1L)).thenReturn(Optional.of(mathCourse));
+		when(this.studentService.findById(1L)).thenReturn(studentObjects.carla());
+
+		students.add(studentObjects.carla());
+		scienceCourse.setStudents(students);
+
+		when(courseRepository.save(any(Course.class))).thenReturn(scienceCourse);
+
+		Course createdCourse = this.courseService.update(scienceCourse, 1L);
+		Student carla = createdCourse.getStudents().stream().filter(x -> x.getId().equals(1L))
+				.findFirst().orElse(null);
+
+		Assertions.assertThat(createdCourse.getName()).isEqualTo("Science");
+		Assertions.assertThat(createdCourse.getStudents()).hasSize(1);
+		Assertions.assertThat(carla.getName()).isEqualTo("carla");
+		Assertions.assertThat(createdCourse.getStudents()).contains(carla);
+
+		verify(courseRepository).save(any(Course.class));
+		verify(studentService).findById(1L);
+
+	}
 
 }
