@@ -49,13 +49,11 @@ public class Course {
 
 	@ManyToOne
 	@JoinColumn(name = "teacher_id")
+	@JsonIgnoreProperties(value = "courses")
 	private Teacher teacher;
 
 	@ManyToMany(cascade = CascadeType.ALL)
 	@JoinTable(name = "student_course", joinColumns = @JoinColumn(name = "course_id"), inverseJoinColumns = @JoinColumn(name = "student_id"))
 	@JsonIgnoreProperties(value = "courses")
 	private Set<Student> students;
-
-//	@OneToMany(fetch = FetchType.LAZY, mappedBy = "course", cascade = CascadeType.ALL)
-//	private Set<Local> local = new HashSet<>();
 }

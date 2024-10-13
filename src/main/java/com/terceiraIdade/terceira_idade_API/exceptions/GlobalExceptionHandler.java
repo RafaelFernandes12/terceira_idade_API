@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -47,20 +46,7 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(DataIntegrityViolationException.class)
 	public ResponseEntity<ErrorResponse> handleDataIntegrityViolationException(
 			DataIntegrityViolationException e, HttpServletRequest request) {
-
-		String rootCauseMessage = ExceptionUtils.getRootCauseMessage(e);
-
-		Map<String, String> errors = new HashMap<String, String>();
-		HttpStatus status = HttpStatus.BAD_REQUEST;
-		if (rootCauseMessage.contains("course"))
-			errors.put("curso", "Já existe um curso com o mesmo nome");
-		else if (rootCauseMessage.contains("student"))
-			errors.put("cpf", "CPF está em uso");
-		else {
-			errors.put("Servidor", "Um imprevisto ocorreu, tente novamente mais tarde!");
-			status = HttpStatus.INTERNAL_SERVER_ERROR;
-		}
-		return errorResponse.errorResponseBuilder(e, status, errors, request);
+		return errorResponse.errorResponseBuilder(e, HttpStatus.CONFLICT, null, request);
 	}
 
 	@ExceptionHandler(ConstraintViolationException.class)

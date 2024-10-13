@@ -60,7 +60,7 @@ public class Student {
 
 	@NotNull
 	@OneToOne(cascade = CascadeType.ALL)
-	@JoinColumn(name = "student_id")
+	@JoinColumn(name = "studentDocs_id")
 	private StudentDocs studentDocs;
 
 	@ManyToMany(mappedBy = "students", cascade = CascadeType.ALL)

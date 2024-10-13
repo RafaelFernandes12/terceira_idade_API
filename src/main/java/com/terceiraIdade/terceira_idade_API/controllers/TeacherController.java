@@ -33,23 +33,27 @@ public class TeacherController {
 		List<Teacher> obj = this.teacherService.findAll();
 		return ResponseEntity.ok().body(obj);
 	}
+
 	@GetMapping("/{id}")
 	public ResponseEntity<Teacher> findById(@PathVariable Long id) {
 		Teacher obj = this.teacherService.findById(id);
 		return ResponseEntity.ok().body(obj);
 	}
-    @PostMapping
-    public ResponseEntity<Teacher> create(@Valid @RequestBody Teacher teacher) {
-    	Teacher obj = teacherService.create(teacher);
-        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(obj.getId()).toUri();
-        return ResponseEntity.created(uri).build();
-    }
+
+	@PostMapping
+	public ResponseEntity<Teacher> create(@Valid @RequestBody Teacher teacher) {
+		Teacher obj = teacherService.create(teacher);
+		URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}")
+				.buildAndExpand(obj.getId()).toUri();
+		return ResponseEntity.created(uri).build();
+	}
+
 	@PutMapping("/{id}")
 	public ResponseEntity<Void> update(@Valid @RequestBody Teacher teacher, @PathVariable Long id) {
 		this.teacherService.update(teacher, id);
 		return ResponseEntity.noContent().build();
 	}
-	
+
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> delete(@PathVariable Long id) {
 		this.teacherService.delete(id);

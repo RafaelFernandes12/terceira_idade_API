@@ -1,6 +1,9 @@
 package com.terceiraIdade.terceira_idade_API.services;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -9,13 +12,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.dao.DataIntegrityViolationException;
 
 import com.terceiraIdade.terceira_idade_API.exceptions.exceptionsDetails.NotFoundException;
 import com.terceiraIdade.terceira_idade_API.models.Course;
@@ -33,10 +36,8 @@ class CourseServiceTest {
 
 	@InjectMocks
 	private CourseService courseService;
-
 	@InjectMocks
 	private CourseObjects courseObjects;
-
 	@InjectMocks
 	private StudentObjects studentObjects;
 
@@ -71,13 +72,26 @@ class CourseServiceTest {
 		Student carla = createdCourse.getStudents().stream().filter(x -> x.getId().equals(1L))
 				.findFirst().orElse(null);
 
-		Assertions.assertThat(createdCourse.getName()).isEqualTo("Math");
-		Assertions.assertThat(createdCourse.getStudents()).hasSize(1);
-		Assertions.assertThat(carla.getName()).isEqualTo("carla");
-		Assertions.assertThat(createdCourse.getStudents()).contains(carla);
+		assertThat(createdCourse).isEqualTo(mathCourse);
+		assertThat(createdCourse.getStudents()).hasSize(1);
+		assertThat(createdCourse.getStudents()).contains(carla);
+		assertThat(carla.getName()).isEqualTo("carla");
 
 		verify(courseRepository).save(any(Course.class));
 		verify(studentService).findById(1L);
+	}
+
+	@Test
+	void save_createCourseThrowDataIntegrityViolationException_exception() {
+		when(this.courseRepository.save(any(Course.class)))
+				.thenThrow(DataIntegrityViolationException.class);
+
+		try {
+			this.courseService.create(mathCourse);
+		} catch (Exception e) {
+			assertThat(e.getClass()).isEqualTo(DataIntegrityViolationException.class);
+			assertThat(e.getMessage()).isEqualTo("Nome já em uso!");
+		}
 	}
 
 	@Test
@@ -85,14 +99,13 @@ class CourseServiceTest {
 		when(courseRepository.findById(mathCourse.getId())).thenReturn(Optional.of(mathCourse));
 
 		Course actualCourse = courseService.findById(mathCourse.getId());
-
-		Assertions.assertThat(mathCourse.getName()).isEqualTo("Math");
-		Assertions.assertThat(mathCourse).isEqualTo(actualCourse);
+		assertThat(actualCourse).isEqualTo(mathCourse);
 	}
 
 	@Test
 	void findById_throwNotFoundExceptionWhenCourseIsNotFound_exception() {
-		Assertions.assertThatThrownBy(() -> this.courseService.findById(10000L))
+
+		assertThatThrownBy(() -> this.courseService.findById(10000L))
 				.isInstanceOf(NotFoundException.class)
 				.hasMessageContaining("Nenhum curso com o id: " + 10000L + " foi encontrado");
 	}
@@ -104,12 +117,7 @@ class CourseServiceTest {
 
 		List<Course> actualCourses = courseService.findAll();
 
-		Assertions.assertThat(actualCourses).isNotEmpty().isEqualTo(courses);
-	}
-
-	@Test
-	void findAll_returnAnEmptyArray_success() {
-		Assertions.assertThat(this.courseService.findAll()).isEmpty();
+		assertThat(actualCourses).isNotEmpty().isEqualTo(courses);
 	}
 
 	@Test
@@ -137,14 +145,28 @@ class CourseServiceTest {
 		Student carla = createdCourse.getStudents().stream().filter(x -> x.getId().equals(1L))
 				.findFirst().orElse(null);
 
-		Assertions.assertThat(createdCourse.getName()).isEqualTo("Science");
-		Assertions.assertThat(createdCourse.getStudents()).hasSize(1);
-		Assertions.assertThat(carla.getName()).isEqualTo("carla");
-		Assertions.assertThat(createdCourse.getStudents()).contains(carla);
+		assertThat(createdCourse).isEqualTo(scienceCourse);
+		assertThat(createdCourse.getStudents()).hasSize(1);
+		assertThat(carla.getName()).isEqualTo("carla");
+		assertThat(createdCourse.getStudents()).contains(carla);
 
 		verify(courseRepository).save(any(Course.class));
 		verify(studentService).findById(1L);
 
+	}
+
+	@Test
+	void update_updateCourseThrowDataIntegrityViolationException_exception() {
+		when(this.courseRepository.findById(anyLong())).thenReturn(Optional.of(mathCourse));
+		when(this.courseRepository.save(any(Course.class)))
+				.thenThrow(DataIntegrityViolationException.class);
+
+		try {
+			this.courseService.update(mathCourse, 2L);
+		} catch (Exception e) {
+			assertThat(e.getClass()).isEqualTo(DataIntegrityViolationException.class);
+			assertThat(e.getMessage()).isEqualTo("Nome já em uso!");
+		}
 	}
 
 }

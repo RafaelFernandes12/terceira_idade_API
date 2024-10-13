@@ -11,29 +11,20 @@ import com.terceiraIdade.terceira_idade_API.models.Teacher;
 
 public class CourseObjects {
 
-	
 	public Course mathCourseMock() {
 		return Course.builder().id(1L).name("Math").type(Type.EXTENSAO).img("math.png")
-				.teacher(new Teacher(1L, "John", "img.file")).students(new HashSet<Student>()).build();
-	}
-
-	public Course anotherMathCourseMock() {
-		return Course.builder().id(2L).name("Math").type(Type.EXTENSAO).img("math.png")
-				.teacher(new Teacher(1L, "John", "img.file")).students(new HashSet<Student>()).build();
+				.teacher(new Teacher(1L, "John", "img.file")).students(new HashSet<Student>())
+				.build();
 	}
 
 	public Course scienceCourseMock() {
-		return Course.builder().name("Science").type(Type.EXTENSAO).img("science.png").teacher(new Teacher())
-				.students(new HashSet<Student>()).build();
+		return Course.builder().name("Science").type(Type.EXTENSAO).img("science.png")
+				.teacher(new Teacher()).students(new HashSet<Student>()).build();
 	}
 
 	public Course englishCourseMock() {
-		return Course.builder().id(3L).name("English").type(Type.ENSINO).img("english.png").teacher(new Teacher())
-				.students(new HashSet<Student>()).build();
-	}
-
-	public Course emptyCourseMock() {
-		return new Course();
+		return Course.builder().id(3L).name("English").type(Type.ENSINO).img("english.png")
+				.teacher(new Teacher()).students(new HashSet<Student>()).build();
 	}
 
 	public List<Course> listOfCoursesMock() {

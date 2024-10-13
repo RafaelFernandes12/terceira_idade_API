@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import com.terceiraIdade.terceira_idade_API.exceptions.exceptionsDetails.NotFoundException;
@@ -19,27 +20,31 @@ public class CourseService {
 
 	@Autowired
 	private CourseRepository courseRepository;
+
 	@Autowired
 	private StudentService studentService;
 
 	@Transactional
 	public Course create(Course course) {
-		Course newCourse = Course.builder().img(course.getImg()).name(course.getName())
-				.students(course.getStudents()).teacher(course.getTeacher()).type(course.getType())
-				.build();
+		try {
+			Course newCourse = Course.builder().img(course.getImg()).name(course.getName())
+					.students(course.getStudents()).teacher(course.getTeacher())
+					.type(course.getType()).build();
 
-		Set<Student> studentsToAdd = new HashSet<Student>();
+			Set<Student> studentsToAdd = new HashSet<Student>();
 
-		for (Student s : newCourse.getStudents()) {
-			Student foundStudent = this.studentService.findById(s.getId());
-			studentsToAdd.add(foundStudent);
+			for (Student s : newCourse.getStudents()) {
+				Student foundStudent = this.studentService.findById(s.getId());
+				studentsToAdd.add(foundStudent);
+			}
+
+			newCourse.setStudents(studentsToAdd);
+			return courseRepository.save(newCourse);
+
+		} catch (DataIntegrityViolationException e) {
+			throw new DataIntegrityViolationException("Nome já em uso!");
 		}
 
-		newCourse.setStudents(studentsToAdd);
-
-		Course createdCourse = courseRepository.save(newCourse);
-
-		return createdCourse;
 	}
 
 	public List<Course> findAll() {
@@ -53,21 +58,22 @@ public class CourseService {
 
 	@Transactional
 	public Course update(Course course, Long id) {
-		findById(id);
+		try {
+			findById(id);
+			Course newCourse = Course.builder().id(id).img(course.getImg()).name(course.getName())
+					.students(course.getStudents()).teacher(course.getTeacher())
+					.type(course.getType()).build();
+			Set<Student> studentsToAdd = new HashSet<Student>();
+			for (Student s : newCourse.getStudents()) {
+				Student foundStudent = this.studentService.findById(s.getId());
+				studentsToAdd.add(foundStudent);
+			}
+			newCourse.setStudents(studentsToAdd);
 
-		Course newCourse = Course.builder().id(id).img(course.getImg()).name(course.getName())
-				.students(course.getStudents()).teacher(course.getTeacher()).type(course.getType())
-				.build();
-		Set<Student> studentsToAdd = new HashSet<Student>();
-		for (Student s : newCourse.getStudents()) {
-			Student foundStudent = this.studentService.findById(s.getId());
-			studentsToAdd.add(foundStudent);
+			return courseRepository.save(newCourse);
+		} catch (DataIntegrityViolationException e) {
+			throw new DataIntegrityViolationException("Nome já em uso!");
 		}
-		newCourse.setStudents(studentsToAdd);
-
-		courseRepository.save(newCourse);
-
-		return newCourse;
 	}
 
 	public void delete(Long id) {
