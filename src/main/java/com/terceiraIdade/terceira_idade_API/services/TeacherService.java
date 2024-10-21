@@ -86,4 +86,9 @@ public class TeacherService {
 		Teacher teacher = findById(id);
 		this.teacherRepository.delete(teacher);
 	}
+
+	public List<Teacher> findByName(String name) {
+		return teacherRepository.findByNameContainingIgnoreCase(name);
+	}
+
 }

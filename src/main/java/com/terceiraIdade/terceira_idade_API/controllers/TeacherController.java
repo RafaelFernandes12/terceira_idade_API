@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -38,6 +39,12 @@ public class TeacherController {
 	public ResponseEntity<Teacher> findById(@PathVariable Long id) {
 		Teacher obj = this.teacherService.findById(id);
 		return ResponseEntity.ok().body(obj);
+	}
+
+	@GetMapping("/search")
+	public ResponseEntity<List<Teacher>> findByName(@RequestParam String name) {
+		List<Teacher> teachers = this.teacherService.findByName(name);
+		return ResponseEntity.ok().body(teachers);
 	}
 
 	@PostMapping

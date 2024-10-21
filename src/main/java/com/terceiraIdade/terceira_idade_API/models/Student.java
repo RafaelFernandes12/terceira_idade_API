@@ -53,6 +53,9 @@ public class Student {
 
 	private String img;
 
+	@Builder.Default
+	private boolean isArchived = false;
+
 	@NotNull
 	@OneToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "personResponsible_id")
@@ -60,10 +63,11 @@ public class Student {
 
 	@NotNull
 	@OneToOne(cascade = CascadeType.ALL)
-	@JoinColumn(name = "studentDocs_id")
-	private StudentDocs studentDocs;
+	@JoinColumn(name = "docs_id")
+	private Docs docs;
 
 	@ManyToMany(mappedBy = "students", cascade = CascadeType.ALL)
 	@JsonIgnoreProperties(value = "students")
 	private Set<Course> courses;
+
 }

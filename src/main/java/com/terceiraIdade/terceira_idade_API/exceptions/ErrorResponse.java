@@ -44,16 +44,4 @@ public class ErrorResponse {
 						.stackTrace(stackTrace).build());
 	}
 
-	public ResponseEntity<ErrorResponse> errorResponseBuilder(String message, Exception e,
-			HttpStatus status, Map<String, String> errors) {
-		String stackTrace = null;
-		if (printStackTrace)
-			stackTrace = ExceptionUtils.getStackTrace(e);
-
-		return ResponseEntity.status(status)
-				.body(ErrorResponse.builder().message(message).status(status.value())
-						.timestamp(LocalDateTime.now()).errors(errors).stackTrace(stackTrace)
-						.build());
-	}
-
 }

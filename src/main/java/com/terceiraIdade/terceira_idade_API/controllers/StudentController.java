@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.terceiraIdade.terceira_idade_API.models.Student;
@@ -30,6 +31,12 @@ public class StudentController {
 	private StudentService studentService;
 
 	@GetMapping
+	public ResponseEntity<List<Student>> findAllByIsArchivedFalse() {
+		List<Student> students = this.studentService.findAllByIsArchivedFalse();
+		return ResponseEntity.ok().body(students);
+	}
+
+	@GetMapping("/findAll")
 	public ResponseEntity<List<Student>> findAll() {
 		List<Student> students = this.studentService.findAll();
 		return ResponseEntity.ok().body(students);
@@ -39,6 +46,18 @@ public class StudentController {
 	public ResponseEntity<Student> findById(@PathVariable Long id) {
 		Student student = this.studentService.findById(id);
 		return ResponseEntity.ok().body(student);
+	}
+
+	@GetMapping("/searchByName")
+	public ResponseEntity<List<Student>> findByName(@RequestParam String name) {
+		List<Student> students = this.studentService.findByName(name);
+		return ResponseEntity.ok().body(students);
+	}
+
+	@GetMapping("/searchByCpf")
+	public ResponseEntity<List<Student>> findByCpf(@RequestParam String cpf) {
+		List<Student> students = this.studentService.findByCpf(cpf);
+		return ResponseEntity.ok().body(students);
 	}
 
 	@PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)

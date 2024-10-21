@@ -12,6 +12,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import com.terceiraIdade.terceira_idade_API.exceptions.exceptionsDetails.BadRequestException;
+import com.terceiraIdade.terceira_idade_API.exceptions.exceptionsDetails.ForbiddenException;
 import com.terceiraIdade.terceira_idade_API.exceptions.exceptionsDetails.NotFoundException;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,6 +30,18 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<ErrorResponse> handleObjectNotFoundException(NotFoundException e,
 			HttpServletRequest request) {
 		return errorResponse.errorResponseBuilder(e, HttpStatus.NOT_FOUND, null, request);
+	}
+
+	@ExceptionHandler(ForbiddenException.class)
+	public ResponseEntity<ErrorResponse> handleForbiddenException(ForbiddenException e,
+			HttpServletRequest request) {
+		return errorResponse.errorResponseBuilder(e, HttpStatus.FORBIDDEN, null, request);
+	}
+
+	@ExceptionHandler(BadRequestException.class)
+	public ResponseEntity<ErrorResponse> handleBadRequestException(BadRequestException e,
+			HttpServletRequest request) {
+		return errorResponse.errorResponseBuilder(e, HttpStatus.BAD_REQUEST, null, request);
 	}
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)

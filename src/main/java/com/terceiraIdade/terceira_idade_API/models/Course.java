@@ -15,8 +15,10 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -33,7 +35,6 @@ import lombok.Setter;
 public class Course {
 
 	@Id
-	@Column(unique = true)
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
@@ -43,17 +44,31 @@ public class Course {
 
 	private String img;
 
-	@Column(nullable = false)
+	@NotNull
 	@Builder.Default
 	private Type type = Type.EXTENSAO;
 
+	@Builder.Default
+	private boolean isArchived = false;
+
 	@ManyToOne
-	@JoinColumn(name = "teacher_id")
+	@JoinColumn
 	@JsonIgnoreProperties(value = "courses")
 	private Teacher teacher;
+
+	@Builder.Default
+	private int maxStudents = 30;
 
 	@ManyToMany(cascade = CascadeType.ALL)
 	@JoinTable(name = "student_course", joinColumns = @JoinColumn(name = "course_id"), inverseJoinColumns = @JoinColumn(name = "student_id"))
 	@JsonIgnoreProperties(value = "courses")
 	private Set<Student> students;
+
+	@OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
+	private Set<Local> local;
+
+	@ManyToOne
+	@JoinColumn
+	private Semester semester;
+
 }

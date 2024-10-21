@@ -1,8 +1,11 @@
 package com.terceiraIdade.terceira_idade_API.models;
 
-import com.terceiraIdade.terceira_idade_API.enums.*;
+import java.util.Objects;
 
-import jakarta.persistence.CascadeType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.terceiraIdade.terceira_idade_API.enums.DaysOfWeek;
+import com.terceiraIdade.terceira_idade_API.enums.HoursOfClass;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -12,16 +15,16 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "local")
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
+@Builder
 public class Local {
 
 	@Id
@@ -37,15 +40,26 @@ public class Local {
 
 	private String place;
 
-	@ManyToOne(cascade = CascadeType.ALL)
-	@JoinColumn(name = "courses")
+	@ManyToOne
+	@JoinColumn(name = "course_id")
+	@JsonIgnore
 	private Course course;
 
-	public Local(DaysOfWeek day, HoursOfClass hour, String place) {
-		super();
-		this.day = day;
-		this.hour = hour;
-		this.place = place;
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Local other = (Local) obj;
+		return day == other.day && hour == other.hour && Objects.equals(place, other.place);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(day, hour, place);
 	}
 
 }

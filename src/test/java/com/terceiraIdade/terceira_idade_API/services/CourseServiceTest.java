@@ -20,6 +20,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.dao.DataIntegrityViolationException;
 
+import com.terceiraIdade.terceira_idade_API.exceptions.exceptionsDetails.BadRequestException;
 import com.terceiraIdade.terceira_idade_API.exceptions.exceptionsDetails.NotFoundException;
 import com.terceiraIdade.terceira_idade_API.models.Course;
 import com.terceiraIdade.terceira_idade_API.models.Student;
@@ -79,6 +80,14 @@ class CourseServiceTest {
 
 		verify(courseRepository).save(any(Course.class));
 		verify(studentService).findById(1L);
+	}
+
+	@Test
+	void save_createCourseThrowsBadRequestWhenMaxStudentsExceedTheCap_exception() {
+		when(courseRepository.save(any(Course.class))).thenThrow(BadRequestException.class);
+		assertThatThrownBy(() -> courseService.create(mathCourse))
+				.isInstanceOf(BadRequestException.class).hasMessageContaining(
+						"O curso deve ter menos de " + mathCourse.getMaxStudents() + " estudantes");
 	}
 
 	@Test

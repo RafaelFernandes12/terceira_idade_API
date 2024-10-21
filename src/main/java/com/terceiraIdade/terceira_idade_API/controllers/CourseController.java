@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.terceiraIdade.terceira_idade_API.exceptions.ErrorResponse;
@@ -35,6 +36,18 @@ public class CourseController {
 		return ResponseEntity.ok().body(courses);
 	}
 
+	@GetMapping("/archive")
+	public ResponseEntity<List<Course>> findAllByIsArchivedFalse(@RequestParam boolean isArchived) {
+		List<Course> courses = this.courseService.findAllByIsArchived(isArchived);
+		return ResponseEntity.ok().body(courses);
+	}
+
+	@GetMapping("/search")
+	public ResponseEntity<List<Course>> findByName(@RequestParam String name) {
+		List<Course> courses = this.courseService.findByName(name);
+		return ResponseEntity.ok().body(courses);
+	}
+
 	@GetMapping("/{id}")
 	public ResponseEntity<Course> findById(@PathVariable Long id) {
 		Course course = this.courseService.findById(id);
@@ -50,6 +63,12 @@ public class CourseController {
 	@PutMapping("/{id}")
 	public ResponseEntity<Void> update(@Valid @RequestBody Course course, @PathVariable Long id) {
 		this.courseService.update(course, id);
+		return ResponseEntity.noContent().build();
+	}
+
+	@PutMapping("/archive/{id}")
+	public ResponseEntity<Void> updateArchived(@PathVariable Long id) {
+		this.courseService.archiveCourse(id);
 		return ResponseEntity.noContent().build();
 	}
 

@@ -1,7 +1,7 @@
 package com.terceiraIdade.terceira_idade_API.models.DTO;
 
 import com.terceiraIdade.terceira_idade_API.models.PersonResponsible;
-import com.terceiraIdade.terceira_idade_API.models.StudentDocs;
+import com.terceiraIdade.terceira_idade_API.models.Docs;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -26,5 +26,5 @@ public class StudentsNoCourseDTO {
 
 	private PersonResponsible personResponsible;
 
-	private StudentDocs studentDocs;
+	private Docs studentDocs;
 }
