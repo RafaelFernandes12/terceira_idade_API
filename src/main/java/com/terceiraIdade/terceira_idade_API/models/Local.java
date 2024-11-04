@@ -1,11 +1,13 @@
 package com.terceiraIdade.terceira_idade_API.models;
 
 import java.util.Objects;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.terceiraIdade.terceira_idade_API.enums.DaysOfWeek;
 import com.terceiraIdade.terceira_idade_API.enums.HoursOfClass;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -13,8 +15,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.ManyToMany;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -40,10 +41,9 @@ public class Local {
 
 	private String place;
 
-	@ManyToOne
-	@JoinColumn(name = "course_id")
+	@ManyToMany(mappedBy = "locals", cascade = CascadeType.ALL)
 	@JsonIgnore
-	private Course course;
+	private Set<Course> course;
 
 	@Override
 	public boolean equals(Object obj) {

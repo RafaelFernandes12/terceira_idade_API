@@ -90,16 +90,13 @@ class StudentServiceTest {
 			when(courseService.findById(anyLong())).thenReturn(math);
 			when(courseRepository.save(any(Course.class))).thenReturn(math);
 			when(this.studentRepository.save(any(Student.class)))
-					.thenThrow(new DataIntegrityViolationException("cpf"));
+					.thenThrow(new DataIntegrityViolationException("Cpf está em uso"));
 			courses.add(math);
 			carla.setCourses(courses);
 			this.studentService.create(carla);
 		} catch (Exception e) {
 			assertThat(e.getClass()).isEqualTo(DataIntegrityViolationException.class);
-			if (e.getMessage().contains("cpf"))
-				assertThat(e.getMessage()).isEqualTo("Cpf está em uso!");
-			else
-				assertThat(e.getMessage()).isEqualTo(e.getMessage());
+			assertThat(e.getMessage()).isEqualTo("Cpf está em uso");
 		}
 	}
 

@@ -31,34 +31,14 @@ public class StudentService {
 	@Transactional
 	public Student create(Student student) {
 		try {
-			Student newStudent = Student.builder().birth(student.getBirth()).docs(student.getDocs())
-					.cpf(student.getCpf()).img(student.getImg()).name(student.getName())
-					.courses(student.getCourses()).personResponsible(student.getPersonResponsible())
-					.phone(student.getPhone()).build();
+
 			Set<Course> coursesToAdd = new HashSet<>();
 
-			for (Course c : newStudent.getCourses()) {
-				Course foundCourse = this.courseService.findById(c.getId());
+			addCourses(student, coursesToAdd);
+			saveCourse(student, coursesToAdd);
 
-				if (foundCourse.isArchived())
-					throw new ForbiddenException(
-							"Não é permitido adicionar alunos a um curso arquivado!");
+			return studentRepository.save(student);
 
-				if (foundCourse.getStudents().size() > foundCourse.getMaxStudents())
-					throw new BadRequestException("O curso deve ter menos de "
-							+ foundCourse.getMaxStudents() + " estudantes");
-				coursesToAdd.add(foundCourse);
-			}
-
-			newStudent.setCourses(coursesToAdd);
-			Student createStudent = studentRepository.save(newStudent);
-
-			for (Course c : coursesToAdd) {
-				Course foundCourse = this.courseService.findById(c.getId());
-				foundCourse.getStudents().add(newStudent);
-				courseRepository.save(foundCourse);
-			}
-			return createStudent;
 		} catch (DataIntegrityViolationException e) {
 			if (e.getMessage().contains(student.getCpf()))
 				throw new DataIntegrityViolationException("Cpf já está em uso");
@@ -68,10 +48,6 @@ public class StudentService {
 
 	public List<Student> findAll() {
 		return studentRepository.findAll();
-	}
-
-	public List<Student> findAllByIsArchivedFalse() {
-		return studentRepository.findAllByIsArchivedFalse();
 	}
 
 	public List<Student> findByName(String name) {
@@ -90,44 +66,24 @@ public class StudentService {
 	@Transactional
 	public Student update(Student student, Long id) {
 		Student existingStudent = findById(id);
+
 		existingStudent.getCourses().forEach(c -> {
-			var course = courseRepository.findById(c.getId()).orElse(null);
-			if (!course.isArchived()) {
-				courseRepository.delete(course);
-			}
+			Course course = courseService.findById(c.getId());
+			if (!course.isArchived())
+				course.getStudents().remove(existingStudent);
+
 		});
+
 		try {
-			Student newStudent = Student.builder().id(id).birth(student.getBirth())
-					.docs(student.getDocs()).cpf(student.getCpf()).img(student.getImg())
-					.name(student.getName()).courses(student.getCourses())
-					.personResponsible(student.getPersonResponsible()).phone(student.getPhone())
-					.build();
+			student.setId(id);
 
 			Set<Course> coursesToAdd = new HashSet<>();
 
-			for (Course c : newStudent.getCourses()) {
-				Course foundCourse = this.courseService.findById(c.getId());
+			addCourses(student, coursesToAdd);
 
-				if (foundCourse.isArchived())
-					throw new ForbiddenException(
-							"Não é permitido adicionar alunos a um curso arquivado!");
+			saveCourse(student, coursesToAdd);
 
-				if (foundCourse.getStudents().size() > foundCourse.getMaxStudents())
-					throw new BadRequestException("O curso deve ter menos de "
-							+ foundCourse.getMaxStudents() + " estudantes");
-				coursesToAdd.add(foundCourse);
-			}
-
-			newStudent.setCourses(coursesToAdd);
-			Student createStudent = studentRepository.save(newStudent);
-
-			for (Course c : coursesToAdd) {
-				Course foundCourse = this.courseService.findById(c.getId());
-
-				foundCourse.getStudents().add(newStudent);
-				courseRepository.save(foundCourse);
-			}
-			return createStudent;
+			return studentRepository.save(student);
 
 		} catch (DataIntegrityViolationException e) {
 			throw new DataIntegrityViolationException("Cpf está em uso");
@@ -137,16 +93,35 @@ public class StudentService {
 	public void delete(Long id) {
 		Student student = findById(id);
 
-		Student savedStudent = null;
-		for (Course c : student.getCourses()) {
-			if (c.isArchived()) {
-				student.setArchived(true);
-				savedStudent = studentRepository.save(student);
-			}
-		}
+		if (student.getCourses().size() > 0)
+			throw new ForbiddenException(
+					"Não é permitido deletar um aluno que esteja matriculado em um curso!");
 
-		if (savedStudent == null)
-			studentRepository.delete(student);
+		studentRepository.delete(student);
 	}
 
+	private void addCourses(Student newStudent, Set<Course> coursesToAdd) {
+		for (Course c : newStudent.getCourses()) {
+			Course foundCourse = this.courseService.findById(c.getId());
+
+			if (foundCourse.isArchived())
+				throw new ForbiddenException(
+						"Não é permitido adicionar alunos a um curso arquivado!");
+
+			if (foundCourse.getStudents().size() > foundCourse.getMaxStudents())
+				throw new BadRequestException("O curso deve ter menos de "
+						+ foundCourse.getMaxStudents() + " estudantes");
+			coursesToAdd.add(foundCourse);
+			newStudent.setCourses(coursesToAdd);
+		}
+	}
+
+	private void saveCourse(Student newStudent, Set<Course> coursesToAdd) {
+		for (Course c : coursesToAdd) {
+			Course foundCourse = this.courseService.findById(c.getId());
+
+			foundCourse.getStudents().add(newStudent);
+			courseRepository.save(foundCourse);
+		}
+	}
 }

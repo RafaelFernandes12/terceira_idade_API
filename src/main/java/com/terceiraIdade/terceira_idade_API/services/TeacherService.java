@@ -7,6 +7,7 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.terceiraIdade.terceira_idade_API.exceptions.exceptionsDetails.ForbiddenException;
 import com.terceiraIdade.terceira_idade_API.exceptions.exceptionsDetails.NotFoundException;
 import com.terceiraIdade.terceira_idade_API.models.Course;
 import com.terceiraIdade.terceira_idade_API.models.Teacher;
@@ -84,6 +85,10 @@ public class TeacherService {
 
 	public void delete(Long id) {
 		Teacher teacher = findById(id);
+
+		if (teacher.getCourses().size() > 0)
+			throw new ForbiddenException("Não é permitido deletar um professor que possua cursos!");
+
 		this.teacherRepository.delete(teacher);
 	}
 

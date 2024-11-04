@@ -2,7 +2,6 @@ package com.terceiraIdade.terceira_idade_API.services;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,21 +12,19 @@ import com.terceiraIdade.terceira_idade_API.exceptions.exceptionsDetails.BadRequ
 import com.terceiraIdade.terceira_idade_API.exceptions.exceptionsDetails.ForbiddenException;
 import com.terceiraIdade.terceira_idade_API.exceptions.exceptionsDetails.NotFoundException;
 import com.terceiraIdade.terceira_idade_API.models.Course;
-import com.terceiraIdade.terceira_idade_API.models.Local;
+import com.terceiraIdade.terceira_idade_API.models.Semester;
 import com.terceiraIdade.terceira_idade_API.models.Student;
 import com.terceiraIdade.terceira_idade_API.repositories.CourseRepository;
-import com.terceiraIdade.terceira_idade_API.repositories.LocalRepository;
 
 import jakarta.transaction.Transactional;
+import lombok.extern.log4j.Log4j2;
 
 @Service
+@Log4j2
 public class CourseService {
 
 	@Autowired
 	private CourseRepository courseRepository;
-	@Autowired
-	private LocalRepository localRepository;
-
 	@Autowired
 	private StudentService studentService;
 	@Autowired
@@ -37,22 +34,14 @@ public class CourseService {
 	public Course create(Course course) {
 		try {
 
+			findSemester(course);
+			loopLocal(course);
 			throwExceptions(course, course, "criar");
 			addStudents(course);
-
-			loopLocal(course);
-			findSemester(course);
-			Course courseCreate = courseRepository.save(course);
-
-			course.getLocal().forEach(l -> l.setCourse(courseCreate));
-
-			return courseCreate;
+			return courseRepository.save(course);
 
 		} catch (DataIntegrityViolationException e) {
-			if (e.getMessage().contains(course.getName()))
-				throw new DataIntegrityViolationException("Nome já em uso!");
-			else
-				throw new DataIntegrityViolationException(e.getMessage());
+			throw new DataIntegrityViolationException(e.getMessage());
 		}
 
 	}
@@ -66,8 +55,9 @@ public class CourseService {
 	}
 
 	public Course findById(Long id) {
-		return this.courseRepository.findById(id).orElseThrow(
+		var course = this.courseRepository.findById(id).orElseThrow(
 				() -> new NotFoundException("Nenhum curso com o id: " + id + " foi encontrado"));
+		return course;
 	}
 
 	@Transactional
@@ -77,14 +67,11 @@ public class CourseService {
 
 			Course newCourse = Course.builder().id(id).img(course.getImg()).name(course.getName())
 					.students(course.getStudents()).teacher(course.getTeacher())
-					.semester(course.getSemester()).local(course.getLocal())
+					.semester(course.getSemester()).locals(course.getLocals())
 					.maxStudents(course.getMaxStudents()).type(course.getType()).build();
 
 			throwExceptions(existingCourse, newCourse, "atualizar");
 			addStudents(newCourse);
-
-			localRepository.findByCourse(newCourse).forEach(l -> localRepository.delete(l));
-			newCourse.getLocal().forEach(l -> l.setCourse(newCourse));
 
 			loopLocal(newCourse);
 
@@ -100,6 +87,8 @@ public class CourseService {
 	public void delete(Long id) {
 		Course existingCourse = findById(id);
 		throwExceptions(existingCourse, existingCourse, "deletar");
+		if (existingCourse.getStudents().size() > 0)
+			throw new ForbiddenException("Não é permitido deletar um curso que possua alunos!");
 		this.courseRepository.delete(existingCourse);
 	}
 
@@ -107,6 +96,7 @@ public class CourseService {
 		return courseRepository.findByNameContainingIgnoreCase(name);
 	}
 
+	@Transactional
 	public Course archiveCourse(Long id) {
 		Course archiveCourse = findById(id);
 		archiveCourse.setArchived(!archiveCourse.isArchived());
@@ -134,15 +124,16 @@ public class CourseService {
 	}
 
 	private void loopLocal(Course course) {
-		course.getLocal().forEach(l -> {
-			Optional<Local> repeatedLocal = localRepository.findByDayAndHourAndPlace(l.getDay(),
-					l.getHour(), l.getPlace());
-			if (repeatedLocal.isPresent())
-				throw new BadRequestException("O local já está sendo usado");
+
+		course.getLocals().forEach(l -> {
+			var repeatedObj = courseRepository.findBySemesterAndLocals(course.getSemester(),
+					l.getDay(), l.getHour(), l.getPlace());
+			if (repeatedObj.isPresent())
+				throw new BadRequestException("O local já está sendo usado nesse semestre");
 		});
 	}
 
-	private void findSemester(Course course) {
-		semesterService.findById(course.getSemester().getYear());
+	private Semester findSemester(Course course) {
+		return semesterService.findById(course.getSemester().getYear());
 	}
 }

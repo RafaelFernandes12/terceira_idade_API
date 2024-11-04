@@ -31,12 +31,6 @@ public class StudentController {
 	private StudentService studentService;
 
 	@GetMapping
-	public ResponseEntity<List<Student>> findAllByIsArchivedFalse() {
-		List<Student> students = this.studentService.findAllByIsArchivedFalse();
-		return ResponseEntity.ok().body(students);
-	}
-
-	@GetMapping("/findAll")
 	public ResponseEntity<List<Student>> findAll() {
 		List<Student> students = this.studentService.findAll();
 		return ResponseEntity.ok().body(students);
