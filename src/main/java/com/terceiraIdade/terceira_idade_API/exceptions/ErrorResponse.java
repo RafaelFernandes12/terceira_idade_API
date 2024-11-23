@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 import java.util.Map;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
@@ -29,8 +28,9 @@ public class ErrorResponse {
 	private Map<String, String> errors;
 	private String path;
 
-	@Value("${server.error.include-exception}")
-	private static boolean printStackTrace;
+	// @Value("${server.error.include-exception}")
+	@Builder.Default
+	private boolean printStackTrace = true;
 
 	public ResponseEntity<ErrorResponse> errorResponseBuilder(Exception e, HttpStatus status,
 			Map<String, String> errors, HttpServletRequest request) {

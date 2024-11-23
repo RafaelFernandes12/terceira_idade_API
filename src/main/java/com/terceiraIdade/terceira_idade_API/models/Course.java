@@ -2,12 +2,13 @@ package com.terceiraIdade.terceira_idade_API.models;
 
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.terceiraIdade.terceira_idade_API.enums.MaxClasses;
 import com.terceiraIdade.terceira_idade_API.enums.Type;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -32,49 +33,50 @@ import lombok.NoArgsConstructor;
 @Builder
 public class Course {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	@NotBlank(message = "O nome não pode estar em branco")
-	private String name;
+    @NotBlank(message = "O nome não pode estar em branco")
+    private String name;
 
-	private String img;
+    private String img;
 
-	@Builder.Default
-	private Type type = Type.EXTENSAO;
+    @Builder.Default
+    private Type type = Type.EXTENSAO;
 
-	@Builder.Default
-	private boolean isArchived = false;
+    @Builder.Default
+    private boolean isArchived = false;
 
-	@Builder.Default
-	private int maxStudents = 30;
+    @Builder.Default
+    private int maxStudents = 30;
 
-	@Builder.Default
-	private MaxClasses maxClasses = MaxClasses.THIRTY;
+    @Builder.Default
+    private int maxClasses = 1800;
 
-	@ManyToOne
-	@JoinColumn
-	@JsonIgnoreProperties(value = "courses")
-	@NotNull
-	private Teacher teacher;
+    @ManyToOne
+    @JoinColumn
+    @JsonIgnoreProperties(value = "courses")
+    @NotNull
+    private Teacher teacher;
 
-	@ManyToMany(cascade = CascadeType.ALL)
-	@JoinTable(name = "student_course", joinColumns = @JoinColumn(name = "course_id"), inverseJoinColumns = @JoinColumn(name = "student_id"))
-	@JsonIgnoreProperties(value = "courses")
-	private Set<Student> students;
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "student_course", joinColumns = @JoinColumn(name = "course_id"), inverseJoinColumns = @JoinColumn(name = "student_id"))
+    @JsonIgnoreProperties(value = "courses")
+    private Set<Student> students;
 
-	@ManyToMany(cascade = CascadeType.ALL)
-	@JoinTable(name = "local_course", joinColumns = @JoinColumn(name = "course_id"), inverseJoinColumns = @JoinColumn(name = "local_id"))
-	@NotNull
-	private Set<Local> locals;
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinTable(name = "local_course", joinColumns = @JoinColumn(name = "course_id"), inverseJoinColumns = @JoinColumn(name = "local_id"))
+    @NotNull
+    private Set<Local> locals;
 
-	@OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
-	private Set<AttendanceSheet> sheets;
+    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
+    private Set<AttendanceSheet> sheets;
 
-	@ManyToOne
-	@JoinColumn
-	@NotNull
-	private Semester semester;
+    @ManyToOne
+    @JoinColumn
+    @NotNull
+    private Semester semester;
 
 }

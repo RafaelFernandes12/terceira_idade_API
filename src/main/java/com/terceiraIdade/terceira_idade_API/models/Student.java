@@ -63,7 +63,7 @@ public class Student {
 	@JoinColumn(name = "docs_id")
 	private Docs docs;
 
-	@ManyToMany(mappedBy = "students")
+	@ManyToMany(mappedBy = "students", cascade = CascadeType.ALL)
 	@JsonIgnoreProperties(value = "students")
 	private Set<Course> courses;
 

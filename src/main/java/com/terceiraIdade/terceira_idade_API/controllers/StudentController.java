@@ -4,7 +4,6 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -27,48 +26,48 @@ import jakarta.validation.Valid;
 @Validated
 public class StudentController {
 
-	@Autowired
-	private StudentService studentService;
+  @Autowired
+  private StudentService studentService;
 
-	@GetMapping
-	public ResponseEntity<List<Student>> findAll() {
-		List<Student> students = this.studentService.findAll();
-		return ResponseEntity.ok().body(students);
-	}
+  @GetMapping
+  public ResponseEntity<List<Student>> findAll() {
+    List<Student> students = this.studentService.findAll();
+    return ResponseEntity.ok().body(students);
+  }
 
-	@GetMapping("/{id}")
-	public ResponseEntity<Student> findById(@PathVariable Long id) {
-		Student student = this.studentService.findById(id);
-		return ResponseEntity.ok().body(student);
-	}
+  @GetMapping("/{id}")
+  public ResponseEntity<Student> findById(@PathVariable Long id) {
+    Student student = this.studentService.findById(id);
+    return ResponseEntity.ok().body(student);
+  }
 
-	@GetMapping("/searchByName")
-	public ResponseEntity<List<Student>> findByName(@RequestParam String name) {
-		List<Student> students = this.studentService.findByName(name);
-		return ResponseEntity.ok().body(students);
-	}
+  @GetMapping("/searchByName")
+  public ResponseEntity<List<Student>> findByName(@RequestParam String name) {
+    List<Student> students = this.studentService.findByName(name);
+    return ResponseEntity.ok().body(students);
+  }
 
-	@GetMapping("/searchByCpf")
-	public ResponseEntity<List<Student>> findByCpf(@RequestParam String cpf) {
-		List<Student> students = this.studentService.findByCpf(cpf);
-		return ResponseEntity.ok().body(students);
-	}
+  @GetMapping("/searchByCpf")
+  public ResponseEntity<List<Student>> findByCpf(@RequestParam String cpf) {
+    List<Student> students = this.studentService.findByCpf(cpf);
+    return ResponseEntity.ok().body(students);
+  }
 
-	@PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Void> create(@RequestBody @Valid Student studentObj) {
-		this.studentService.create(studentObj);
-		return ResponseEntity.status(HttpStatus.CREATED).build();
-	}
+  @PostMapping
+  public ResponseEntity<Void> create(@RequestBody @Valid Student studentObj) {
+    this.studentService.create(studentObj);
+    return ResponseEntity.status(HttpStatus.CREATED).build();
+  }
 
-	@PutMapping(value = "/{id}", consumes = MediaType.APPLICATION_JSON_VALUE)
-	public ResponseEntity<Void> update(@Valid @RequestBody Student student, @PathVariable Long id) {
-		this.studentService.update(student, id);
-		return ResponseEntity.noContent().build();
-	}
+  @PutMapping(value = "/{id}")
+  public ResponseEntity<Void> update(@Valid @RequestBody Student student, @PathVariable Long id) {
+    this.studentService.update(student, id);
+    return ResponseEntity.noContent().build();
+  }
 
-	@DeleteMapping("/{id}")
-	public ResponseEntity<Void> delete(@PathVariable Long id) {
-		this.studentService.delete(id);
-		return ResponseEntity.noContent().build();
-	}
+  @DeleteMapping("/{id}")
+  public ResponseEntity<Void> delete(@PathVariable Long id) {
+    this.studentService.delete(id);
+    return ResponseEntity.noContent().build();
+  }
 }

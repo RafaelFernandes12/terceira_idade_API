@@ -32,6 +32,13 @@ public class GlobalExceptionHandler {
 		return errorResponse.errorResponseBuilder(e, HttpStatus.NOT_FOUND, null, request);
 	}
 
+	@ExceptionHandler(RuntimeException.class)
+	public ResponseEntity<ErrorResponse> handleAllUncaughtException(Exception e,
+			HttpServletRequest request) {
+		return errorResponse.errorResponseBuilder(e, HttpStatus.INTERNAL_SERVER_ERROR, null,
+				request);
+	}
+
 	@ExceptionHandler(ForbiddenException.class)
 	public ResponseEntity<ErrorResponse> handleForbiddenException(ForbiddenException e,
 			HttpServletRequest request) {
@@ -73,6 +80,7 @@ public class GlobalExceptionHandler {
 		for (ConstraintViolation<?> violation : violations) {
 			errors.put(violation.getPropertyPath().toString(), violation.getMessage());
 		}
-		return errorResponse.errorResponseBuilder(e, HttpStatus.BAD_REQUEST, errors, request);
+		return errorResponse.errorResponseBuilder(e, HttpStatus.UNPROCESSABLE_ENTITY, errors,
+				request);
 	}
 }

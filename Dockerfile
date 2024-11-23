@@ -1,12 +1,3 @@
-#FROM maven:3.8.3-openjdk-17
-
-#COPY target/terceira-idade-api.jar
-
-#EXPOSE 8080
-#EXPOSE 8081
-
-#ENTRYPOINT ["java", "-jar", "-Dspring.profiles.active=prod", "terceira-idade-api.jar"]
-
 FROM maven:3.8.3-openjdk-17
 
 ENV PROJECT_HOME /api

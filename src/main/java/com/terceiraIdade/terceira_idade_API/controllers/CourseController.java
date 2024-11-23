@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.terceiraIdade.terceira_idade_API.exceptions.ErrorResponse;
 import com.terceiraIdade.terceira_idade_API.models.Course;
 import com.terceiraIdade.terceira_idade_API.services.CourseService;
 
@@ -55,7 +54,7 @@ public class CourseController {
 	}
 
 	@PostMapping
-	public ResponseEntity<ErrorResponse> create(@RequestBody @Valid Course courseObj) {
+	public ResponseEntity<Void> create(@RequestBody @Valid Course courseObj) {
 		this.courseService.create(courseObj);
 		return ResponseEntity.status(HttpStatus.CREATED).build();
 	}
