@@ -67,7 +67,6 @@ public class TeacherService {
 				.courses(teacher.getCourses()).build();
 
 		Set<Course> coursesToAdd = new HashSet<>();
-
 		for (Course c : newTeacher.getCourses()) {
 			Course foundCourse = this.courseService.findById(c.getId());
 			coursesToAdd.add(foundCourse);

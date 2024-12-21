@@ -26,11 +26,11 @@ public class PersonResponsible {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@NotBlank
+	@NotBlank(message  = "O nome não pode estar em branco")
 	private String name;
 
 	@Size(min = 8, max = 12)
-	@NotBlank
+	@NotBlank(message  = "O nome não pode estar em branco")
 	private String phone;
 
 	@OneToOne(mappedBy = "personResponsible", cascade = CascadeType.ALL)

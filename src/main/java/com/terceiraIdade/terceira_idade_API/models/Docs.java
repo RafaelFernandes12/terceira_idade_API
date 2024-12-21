@@ -22,29 +22,29 @@ import lombok.Setter;
 @Builder
 public class Docs {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-	@NotBlank
-	private String vaccineImg;
+  @NotBlank(message = "Este documento é necessario")
+  private String vaccineImg;
 
-	@NotBlank
-	private String rgFrontImg;
+  @NotBlank(message = "Este documento é necessario")
+  private String rgFrontImg;
 
-	@NotBlank
-	private String rgBackImg;
+  @NotBlank(message = "Este documento é necessario")
+  private String rgBackImg;
 
-	@NotBlank
-	private String residenceImg;
+  @NotBlank(message = "Este documento é necessario")
+  private String residenceImg;
 
-	@NotBlank
-	private String cardioImg;
+  @NotBlank(message = "Este documento é necessario")
+  private String cardioImg;
 
-	@NotBlank
-	private String dermaImg;
+  @NotBlank(message = "Este documento é necessario")
+  private String dermaImg;
 
-	@OneToOne(mappedBy = "docs")
-	@JsonIgnore
-	private Student student;
+  @OneToOne(mappedBy = "docs")
+  @JsonIgnore
+  private Student student;
 }

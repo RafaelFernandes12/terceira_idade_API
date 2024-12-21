@@ -41,7 +41,7 @@ public class ErrorResponse {
 		return ResponseEntity.status(status)
 				.body(ErrorResponse.builder().message(e.getMessage()).status(status.value())
 						.timestamp(LocalDateTime.now()).errors(errors).path(request.getRequestURI())
-						.stackTrace(stackTrace).build());
+						.build());
 	}
 
 }

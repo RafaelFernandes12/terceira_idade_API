@@ -74,7 +74,7 @@ public class StudentService {
         try {
             student.setId(id);
             Set<Course> coursesToAdd = new HashSet<>();
-
+student.getId();
             addCourses(student, coursesToAdd);
             saveCourse(student, coursesToAdd);
 
